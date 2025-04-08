@@ -1,0 +1,16 @@
+name: sceneit-env
+dependencies:
+  - python=3.10
+  - pip
+  - pandas
+  - numpy
+  - scikit-learn
+  - matplotlib
+  - pillow
+  - pip:
+      - transformers
+      - datasets
+      - opencv-python
+      - tqdm
+      - sentence-transformers
+      - jupyter
