@@ -4,7 +4,7 @@ import requests
 from PIL import Image
 
 # Define the directory to store downloaded files
-output_directory = 'downloaded_posters'
+output_directory = 'downloaded_posters/poster'
 os.makedirs(output_directory, exist_ok=True)
 
 # Read the CSV file
