@@ -3,7 +3,7 @@ dependencies:
   - python=3.10
   - pip
   - pandas
-  - numpy
+  - numpy<2
   - scikit-learn
   - matplotlib
   - pillow
