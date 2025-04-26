@@ -12,12 +12,13 @@ from tqdm import tqdm
 from imdb import IMDb
 
 class PosterDataset(Dataset):
-    def __init__(self, root_dir, transform, plots_path, links_path, movies_path,max_length = 512):
+    def __init__(self, root_dir, transform, plots_path, links_path, movies_path, id_plots_path, max_length = 512):
         """
         Args:
             root_dir (str): Directory with all the images
             transform (callable, optional): Optional transform to be applied on a sample
         """
+        print(f'Plots Id path: {id_plots_path}')
         print(f'Plots path: {plots_path}')
         print(f'Links path: {links_path}')
         print(f'Movies path: {movies_path}')
@@ -35,7 +36,7 @@ class PosterDataset(Dataset):
         self.movies = read_csv(movies_path)
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
         self.max_length = max_length
-        
+        self.imdb_plots = read_csv(id_plots_path)
         
     def __len__(self):
         return len(self.plots)
@@ -71,8 +72,6 @@ class PosterDataset(Dataset):
     
     def get_movie_by_id(self, id):
         id = self.links[self.links['movieId'] == id]['imdbId']
-        ia = IMDb()
-        plot = ia.get_movie(id).get('plot', [''])[0]
         if len(id) > 0:
             id = id.values[0]
             if id not in self.movies['imdbId'].values:
@@ -112,6 +111,13 @@ class PosterDataset(Dataset):
                 image = Image.open(poster_path[0]).convert('RGB')
             image = self.transform(image)
 
+            print(id)
+            plot = ""
+            if len(self.imdb_plots[self.imdb_plots['movieId'] == id]['Plot'].values) == 0:
+                print(f'Warning: No plot found for {title}')
+            else:
+                plot = self.imdb_plots[self.imdb_plots['movieId'] == id]['Plot'].values[0]
+
             encoded = self.tokenizer(
                 plot,
                 padding='max_length',
@@ -121,8 +127,6 @@ class PosterDataset(Dataset):
             )
             
             metadata = {
-                'title': title,
-                'year': year,
                 'input_ids': encoded['input_ids'].squeeze(0),
                 'attention_mask': encoded['attention_mask'].squeeze(0)
             }
@@ -142,8 +146,6 @@ class PosterDataset(Dataset):
             )
             
             metadata = {
-                'title': title,
-                'year': year,
                 'input_ids': encoded['input_ids'].squeeze(0),
                 'attention_mask': encoded['attention_mask'].squeeze(0)
             }
@@ -177,7 +179,7 @@ class UserDataset(Dataset):
     def __getitem__(self, idx):
         return self.users[idx].sample_movies(self.profile_size)
 
-def get_dataloader(image_directory, plots_path, movies_path, links_path, ratings_path,profile_size = 10, batch_size = 32, shuffle = True):
+def get_dataloader(image_directory, plots_path, movies_path, links_path, ratings_path, imdb_path, profile_size = 10, batch_size = 32, shuffle = True):
 
     # Define the transformations to apply to each image
     preprocess = transforms.Compose([
@@ -193,7 +195,8 @@ def get_dataloader(image_directory, plots_path, movies_path, links_path, ratings
         transform=preprocess,
         plots_path=plots_path,
         movies_path=movies_path,
-        links_path=links_path
+        links_path=links_path,
+        id_plots_path = imdb_path
     )
     user_dataset = UserDataset(ratings_path = ratings_path, poster_dataset = dataset, profile_size = profile_size)
 
@@ -209,6 +212,6 @@ def get_dataloader(image_directory, plots_path, movies_path, links_path, ratings
 
 
 if __name__ == "__main__":
-    dataloader = get_dataloader("../clean_data/downloaded_posters/poster", "../raw_data/movie_plots.csv", "../clean_data/posters.csv", "../raw_data/links.csv", "../raw_data/ratings.csv", batch_size=1, shuffle=False)
+    dataloader = get_dataloader("../clean_data/downloaded_posters/poster", "../raw_data/movie_plots.csv", "../clean_data/posters.csv", "../raw_data/links.csv", "../raw_data/ratings.csv", "../clean_data/merged.csv", batch_size=1, shuffle=False)
     
     print(next(iter(dataloader)))
