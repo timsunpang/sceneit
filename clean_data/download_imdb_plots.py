@@ -30,7 +30,7 @@ if __name__ == "__main__":
         try:
             plot, imdbId = get_movie_by_id(links, movie_id)
             movies['plot'].append(plot)
-            movies['imdbId'].append(id)
+            movies['imdbId'].append(imdbId)
         except:
             print('Error')
-    pd.DataFrame(data).to_csv('plots_Imdb.csv', index=False)
+    pd.DataFrame(movies).to_csv('plots_Imdb.csv', index=False)
