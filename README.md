@@ -15,12 +15,16 @@ We trained a multimodal model that fuses these sources to predict how a user wou
 
 ## 📊 Results
 
-- **Final model RMSE (denormalized)**: **0.7042**
-- Outperforms:
-  - **SVD**: 0.7889
-  - **User-CF**: 0.9340
-  - **Item-CF**: 0.9021
-- Ablation studies show **metadata** is the most predictive single modality, but combinations generally improve performance.
+- Achieved a **denormalized RMSE of 0.7042** on MovieLens 100k
+- Mean prediction error: **0.0235**, median: **-0.0023**
+- Outperformed baselines:
+  - SVD: 1.301
+  - User-based CF: 1.435
+  - Item-based CF: 1.356
+- Ablation insights:
+  - Best unimodal input: **metadata** (RMSE = 0.871)
+  - Best dual modality: **metadata + posters** (RMSE = 0.845)
+  - Using all three modalities yielded **higher RMSE (0.864)**, indicating naive fusion has limitations
 
 See [`paper.pdf`](./paper.pdf) for full details.
 
